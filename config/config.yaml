@@ -107,5 +107,5 @@ platforms:
     item_selector: "li" # 列表项的CSS选择器
     title_selector: "a" # 标题元素的CSS选择器
     link_selector: "a" # 链接元素的CSS选择器
-    date_selector: "span" # 日期元素的CSS选择器（需要根据网页实际结构调整）
+    date_selector: "span.time" # 日期元素的CSS选择器（需要根据网页实际结构调整）
   # link_base_url: "http://www.chinasydw.org" # 如果链接是相对路径，可能需要用此字段补全
