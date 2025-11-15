@@ -77,25 +77,35 @@ weight:
 
 # name 可以定义任意名称，只具有显示作用，即使项目运行了几天后，忽然改掉 name 也不会影响代码的正常运行
 platforms:
-  - id: "toutiao"
-    name: "今日头条"
-  - id: "baidu"
-    name: "百度热搜"
-  - id: "wallstreetcn-hot"
-    name: "华尔街见闻"
-  - id: "thepaper"
-    name: "澎湃新闻"
-  - id: "bilibili-hot-search"
-    name: "bilibili 热搜"
-  - id: "cls-hot"
-    name: "财联社热门"
-  - id: "ifeng"
-    name: "凤凰网"
-  - id: "tieba"
-    name: "贴吧"
-  - id: "weibo"
-    name: "微博"
-  - id: "douyin"
-    name: "抖音"
-  - id: "zhihu"
-    name: "知乎"
+#  - id: "toutiao"
+#    name: "今日头条"
+#  - id: "baidu"
+#    name: "百度热搜"
+#  - id: "wallstreetcn-hot"
+#    name: "华尔街见闻"
+#  - id: "thepaper"
+#    name: "澎湃新闻"
+#  - id: "bilibili-hot-search"
+#    name: "bilibili 热搜"
+#  - id: "cls-hot"
+#    name: "财联社热门"
+#  - id: "ifeng"
+#    name: "凤凰网"
+#  - id: "tieba"
+#    name: "贴吧"
+#  - id: "weibo"
+#    name: "微博"
+#  - id: "douyin"
+#    name: "抖音"
+#  - id: "zhihu"
+#    name: "知乎"
+  - id: "zhejiang_sydw" # 为此平台设置一个唯一的ID
+    name: "浙江事业单位招聘" # 平台的中文描述名称
+    url: "http://www.chinasydw.org/zhejiang/" # 您要监控的目标网址
+    enabled: true # 启用或禁用此平台的监控
+    list_selector: "ul.list11.clearfix" # 列表容器的CSS选择器
+    item_selector: "li" # 列表项的CSS选择器
+    title_selector: "a" # 标题元素的CSS选择器
+    link_selector: "a" # 链接元素的CSS选择器
+    date_selector: "span" # 日期元素的CSS选择器（需要根据网页实际结构调整）
+  # link_base_url: "http://www.chinasydw.org" # 如果链接是相对路径，可能需要用此字段补全
