@@ -1,0 +1,126 @@
+# crawlers/custom_crawler.py
+import time
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
+from urllib.parse import urljoin
+
+class CustomCrawler:
+    def __init__(self, config):
+        self.config = config
+        self.url = config.get('url')
+        self.list_selector = config.get('list_selector', '')
+        self.item_selector = config.get('item_selector', '')
+        self.title_selector = config.get('title_selector', '')
+        self.link_selector = config.get('link_selector', '')
+        self.date_selector = config.get('date_selector', '')
+        
+    def crawl(self):
+        """
+        执行爬取，返回格式与其他爬虫一致
+        """
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            response = requests.get(self.url, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            news_list = []
+            
+            # 查找列表容器和列表项
+            list_container = soup.select_one(self.list_selector)
+            if list_container:
+                items = list_container.select(self.item_selector)
+            else:
+                items = soup.select(self.item_selector)
+            
+            for item in items:
+                news_item = self.parse_news_item(item)
+                if news_item and self.is_recent_news(news_item.get('publish_time', '')):
+                    news_list.append(news_item)
+            
+            return news_list
+            
+        except Exception as e:
+            print(f"爬取自定义网址 {self.url} 时出错: {str(e)}")
+            return []
+    
+    def parse_news_item(self, item):
+        """
+        解析单个新闻项
+        """
+        try:
+            # 提取标题
+            title_elem = item.select_one(self.title_selector)
+            title = title_elem.get_text().strip() if title_elem else ""
+            
+            # 提取链接
+            link_elem = item.select_one(self.link_selector)
+            link = link_elem.get('href') if link_elem else ""
+            if link and not link.startswith(('http://', 'https://')):
+                link = urljoin(self.url, link)
+            
+            # 提取发布时间
+            publish_time = ""
+            if self.date_selector:
+                date_elem = item.select_one(self.date_selector)
+                if date_elem:
+                    publish_time = date_elem.get_text().strip()
+                    # 标准化日期格式，此处需要根据网站日期格式具体调整
+                    publish_time = self.normalize_date(publish_time)
+            
+            return {
+                'title': title,
+                'link': link,
+                'publish_time': publish_time,
+                'platform': self.config.get('id', 'custom_url')
+            }
+            
+        except Exception as e:
+            print(f"解析新闻项时出错: {str(e)}")
+            return None
+    
+    def normalize_date(self, date_str):
+        """
+        将各种日期格式标准化为统一格式
+        这里需要你根据目标网站的实际日期格式进行补充
+        """
+        # 示例：处理 "3小时前"、"昨天" 等相对时间
+        if "小时" in date_str:
+            hours = int(''.join(filter(str.isdigit, date_str)))
+            publish_time = datetime.now() - timedelta(hours=hours)
+            return publish_time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 示例：处理 "2025-11-15" 格式
+        try:
+            publish_time = datetime.strptime(date_str, "%Y-%m-%d")
+            return publish_time.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            pass
+            
+        # 可以继续添加其他日期格式的处理逻辑
+        return date_str
+    
+    def is_recent_news(self, publish_time, days=3):
+        """
+        判断新闻是否为近几天的
+        """
+        if not publish_time:
+            return True  # 如果没有日期信息，默认保留
+        
+        try:
+            # 尝试解析日期
+            if isinstance(publish_time, str):
+                # 根据实际格式调整
+                publish_date = datetime.strptime(publish_time, "%Y-%m-%d %H:%M:%S")
+            else:
+                publish_date = publish_time
+                
+            cutoff_date = datetime.now() - timedelta(days=days)
+            return publish_date >= cutoff_date
+            
+        except Exception:
+            # 如果日期解析失败，默认保留该新闻
+            return True
